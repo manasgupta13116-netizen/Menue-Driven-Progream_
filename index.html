@@ -1,10 +1,227 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>My Website</title>
+  <meta charset="UTF-8">
+  <title>DSA Visualizer Pro</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      min-height: 100vh;
+      margin:0;
+      color:white;
+      overflow-x:hidden;
+      background: #0b132b;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(255,99,132,0.25) 0%, transparent 40%),
+        radial-gradient(circle at 80% 30%, rgba(255,206,86,0.25) 0%, transparent 40%),
+        radial-gradient(circle at 50% 80%, rgba(75,192,192,0.2) 0%, transparent 40%);
+    }
+
+    body::before, body::after {
+      content:"";
+      position:fixed;
+      width:420px;
+      height:420px;
+      border-radius:50%;
+      filter: blur(120px);
+      opacity:0.5;
+      z-index:-1;
+      
+    }
+
+    body::before {
+      background:#ff6384;
+      top:-120px;
+      left:-120px;
+    }
+
+    body::after {
+      background:#ffce56;
+      bottom:-120px;
+      right:-120px;
+    }
+
+    h1 { margin-top:20px; }
+
+    .menu button {
+      margin:10px;
+      padding:12px 25px;
+      border-radius:10px;
+      background:#ff6384;
+      color:white;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    .menu button:hover { transform:scale(1.1); }
+
+    .hidden { display:none; }
+    .container { margin-top:30px; }
+
+    input { padding:10px; margin:8px; border-radius:8px; }
+
+    button { padding:10px; margin:5px; border-radius:8px; background:#14b8a6; color:white; }
+
+    .node {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:12px 18px;
+      background:#ff6384;
+      margin:8px;
+      border-radius:12px;
+      min-width:40px;
+    }
+
+    .arrow {
+      display:inline-block;
+      margin:0 5px;
+      font-size:20px;
+      color:#facc15;
+    }
+
+    .box { display:inline-block; padding:15px; margin:5px; background:#1e293b; border-radius:10px; }
+    .vertical .box {
+      display:block;
+      margin:10px auto;
+      width:80px;
+      height:50px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:12px; /* curved square */
+    }
+
+    .highlight { background:#facc15 !important; transform:scale(1.2); }
+
+    
+  </style>
 </head>
 <body>
-    <h1>Hello World 🚀</h1>
-    <p>Your site is working!</p>
+
+<h1>🚀 DSA Visualizer Pro</h1>
+
+<div class="menu">
+  <button onclick="show('ll')">Linked List</button>
+  <button onclick="show('stack')">Stack</button>
+  <button onclick="show('queue')">Queue</button>
+</div>
+
+<div id="ll" class="hidden container">
+  <h2>Linked List</h2>
+  <input id="llval" placeholder="Value">
+  <input id="llpos" placeholder="Position">
+  <button onclick="llInsertStart()">Insert Start</button>
+  <button onclick="llInsertEnd()">Insert End</button>
+  <button onclick="llInsertAtPos()">Insert Pos</button>
+  <button onclick="llDeleteAtPos()">Delete Pos</button>
+  <button onclick="llDisplayAlert()">Display</button>
+  <div id="llDisplay"></div>
+</div>
+
+<div id="stack" class="hidden container">
+  <h2>Stack</h2>
+  <input id="sval" placeholder="Value">
+  <button onclick="push()">Push</button>
+  <button onclick="pop()">Pop</button>
+  <button onclick="peek()">Peek</button>
+  <button onclick="isEmptyStack()">Is Empty</button>
+  <button onclick="setVertical()">Vertical</button>
+  <button onclick="setHorizontal()">Horizontal</button>
+  <div id="stackDisplay"></div>
+</div>
+
+<div id="queue" class="hidden container">
+  <h2>Queue</h2>
+  <input id="qval" placeholder="Value">
+  <button onclick="enqueue()">Enqueue</button>
+  <button onclick="dequeue()">Dequeue</button>
+  <div id="queueDisplay"></div>
+</div>
+
+<script>
+function show(id){
+  document.querySelectorAll('.container').forEach(c=>c.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+// Linked List
+let ll=[];
+function renderLL(h=-1){
+  let d = document.getElementById('llDisplay');
+  d.innerHTML='';
+
+  ll.forEach((v,i)=>{
+    let n=document.createElement('div');
+    n.className='node';
+    if(i===h) n.classList.add('highlight');
+    n.innerText=v;
+    d.appendChild(n);
+
+    if(i !== ll.length-1){
+      let arrow=document.createElement('span');
+      arrow.className='arrow';
+      arrow.innerText='→';
+      d.appendChild(arrow);
+    }
+  });
+}
+
+function llInsertStart(){ ll.unshift(llval.value); renderLL(0);} 
+function llInsertEnd(){ ll.push(llval.value); renderLL(ll.length-1);} 
+function llInsertAtPos(){ let p=llpos.value-1; if(p>=0&&p<=ll.length){ ll.splice(p,0,llval.value); renderLL(p);} }
+function llDeleteAtPos(){ let p=llpos.value-1; if(p>=0&&p<ll.length){ renderLL(p); setTimeout(()=>{ll.splice(p,1);renderLL();},400);} }
+function llDisplayAlert(){ alert(ll.join(' → ')+' → NULL'); }
+
+// Stack
+let stack=[],isVertical=false;
+function renderStack(h=-1){
+  let d=document.getElementById('stackDisplay');
+  d.innerHTML='';
+  d.className=isVertical?'vertical':'';
+
+  let items=isVertical?[...stack].reverse():stack;
+
+  items.forEach((v,i)=>{
+    let b=document.createElement('div');
+    b.className='box';
+
+    let idx=isVertical?stack.length-1-i:i;
+    if(idx===h) b.classList.add('highlight');
+
+    b.innerText=v;
+    d.appendChild(b);
+  });
+}
+
+function push(){ stack.push(sval.value); renderStack(stack.length-1);} 
+function pop(){ if(stack.length){ renderStack(stack.length-1); setTimeout(()=>{stack.pop();renderStack();},400);} }
+function peek(){ alert(stack.length?stack.at(-1):'Empty'); }
+function isEmptyStack(){ alert(stack.length?`NOT Empty\n${stack}`:'Empty'); }
+function setVertical(){ isVertical=true; renderStack(); }
+function setHorizontal(){ isVertical=false; renderStack(); }
+
+// Queue
+let queue=[];
+function renderQueue(h=-1){
+  let d=document.getElementById('queueDisplay');
+  d.innerHTML='';
+
+  queue.forEach((v,i)=>{
+    let b=document.createElement('div');
+    b.className='box';
+    if(i===h) b.classList.add('highlight');
+    b.innerText=v;
+    d.appendChild(b);
+  });
+}
+
+function enqueue(){ queue.push(qval.value); renderQueue(queue.length-1);} 
+function dequeue(){ if(queue.length){ renderQueue(0); setTimeout(()=>{queue.shift();renderQueue();},400);} }
+</script>
+
+
+
 </body>
 </html>
